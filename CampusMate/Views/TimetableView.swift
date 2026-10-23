@@ -13,9 +13,41 @@ struct TimetableView: View {
         slots.filter { $0.weekday == selectedDay }
     }
 
+    private var nextUp: NextClassInfo? {
+        ScheduleHelper.nextClass(in: slots)
+    }
+
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing: 12) {
+                // MARK: - Up Next Banner
+                if let upNext = nextUp {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Label("UP NEXT", systemImage: "clock.badge.checkmark")
+                                .font(.caption.bold())
+                                .foregroundStyle(.blue)
+                            Spacer()
+                            Text(upNext.start, style: .relative)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(upNext.slot.subjectName)
+                            .font(.headline)
+                        HStack {
+                            Label("\(upNext.slot.room), \(upNext.slot.buildingName)", systemImage: "mappin.and.ellipse")
+                            Spacer()
+                            Text("\(TimeHelper.format(upNext.slot.startMinutes)) - \(TimeHelper.format(upNext.slot.endMinutes))")
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
+                    .padding(.horizontal)
+                }
+
+                // MARK: - Day Selector
                 Picker("Day", selection: $selectedDay) {
                     ForEach(days, id: \.number) { day in
                         Text(day.name).tag(day.number)
@@ -24,6 +56,7 @@ struct TimetableView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
 
+                // MARK: - Class List
                 List(todaysSlots) { slot in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(slot.subjectName).font(.headline)
@@ -37,7 +70,7 @@ struct TimetableView: View {
                 }
                 .overlay {
                     if todaysSlots.isEmpty {
-                        ContentUnavailableView("No classes", systemImage: "calendar")
+                        ContentUnavailableView("No classes scheduled", systemImage: "calendar")
                     }
                 }
             }
