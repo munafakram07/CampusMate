@@ -6,7 +6,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            Text("Timetable coming next")
+            TimetableView()
                 .tabItem { Label("Timetable", systemImage: "calendar") }
         }
         .task { SeedData.seedIfNeeded(context: context) }
